@@ -299,6 +299,34 @@
     </div>
   </footer>
 
+  <!-- Modal Paparan Besar Aktiviti -->
+  <div id="aktivitiModal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl relative my-8 transform transition-all">
+      <!-- Close button -->
+      <button onclick="closeAktivitiModal()" class="absolute top-3 right-3 z-10 w-9 h-9 bg-slate-900/60 hover:bg-slate-900 text-white rounded-full flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <!-- Modal Image Container -->
+      <div id="modalImageContainer" class="max-h-[60vh] bg-slate-950 flex items-center justify-center overflow-hidden">
+        <img id="modalImg" src="" alt="" class="max-h-[60vh] w-auto max-w-full object-contain">
+      </div>
+
+      <!-- Modal Details -->
+      <div class="p-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <span id="modalKategori" class="text-xs font-bold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full uppercase tracking-wide"></span>
+          <span id="modalTarikh" class="text-xs text-slate-500 font-medium flex items-center">
+            <i class="fa-regular fa-calendar-days mr-1.5 text-emerald-600"></i>
+            <span></span>
+          </span>
+        </div>
+        <h3 id="modalTajuk" class="text-xl sm:text-2xl font-black text-slate-900 mb-3 leading-snug"></h3>
+        <p id="modalPenerangan" class="text-sm sm:text-base text-slate-600 leading-relaxed whitespace-pre-line"></p>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-6PBH4KxFFYHK9mfeO5kT-gR0h6pK330ovW5HZvbaCTxK9QKrQpCy6JLCFmaUafa6og/exec";
 
@@ -349,6 +377,54 @@
       }
     ];
 
+    // Fungsi Modal Paparan Besar Aktiviti
+    function openAktivitiModal(item) {
+      const modal = document.getElementById('aktivitiModal');
+      const modalImg = document.getElementById('modalImg');
+      const imgContainer = document.getElementById('modalImageContainer');
+      const modalKategori = document.getElementById('modalKategori');
+      const modalTarikh = document.getElementById('modalTarikh').querySelector('span');
+      const modalTajuk = document.getElementById('modalTajuk');
+      const modalPenerangan = document.getElementById('modalPenerangan');
+
+      if (item.gambar && item.gambar.trim().startsWith('http')) {
+        modalImg.src = item.gambar;
+        modalImg.alt = item.tajuk || 'Aktiviti';
+        imgContainer.classList.remove('hidden');
+      } else {
+        imgContainer.classList.add('hidden');
+      }
+
+      modalKategori.textContent = item.kategori || 'Aktiviti';
+      modalTarikh.textContent = item.tarikh || 'Terkini';
+      modalTajuk.textContent = item.tajuk || 'Tiada Tajuk';
+      modalPenerangan.textContent = item.penerangan || 'Tiada butiran tambahan disediakan.';
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAktivitiModal() {
+      const modal = document.getElementById('aktivitiModal');
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Tutup modal jika klik di latar belakang gelap
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('aktivitiModal');
+      if (e.target === modal) {
+        closeAktivitiModal();
+      }
+    });
+
+    // Tutup modal dengan kekunci ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAktivitiModal();
+      }
+    });
+
     function renderAktiviti(items) {
       const grid = document.getElementById('aktivitiGrid');
       const loader = document.getElementById('aktivitiLoading');
@@ -359,7 +435,8 @@
 
       list.forEach(item => {
         const card = document.createElement('div');
-        card.className = "bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 flex flex-col hover:shadow-md transition duration-300";
+        card.className = "bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 flex flex-col hover:shadow-lg transition duration-300 cursor-pointer group";
+        card.onclick = () => openAktivitiModal(item);
 
         let mediaHtml = '';
         if (item.gambar && item.gambar.trim().startsWith('http')) {
