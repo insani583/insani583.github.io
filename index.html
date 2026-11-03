@@ -165,54 +165,18 @@
     <div class="max-w-6xl mx-auto">
       <div class="text-center mb-12">
         <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Aktiviti & Program INSANI</h3>
-        <p class="text-slate-600 mt-2">Catatan program kebajikan dan kemasyarakatan yang telah dianjurkan</p>
+        <p class="text-slate-600 mt-2">Catatan program kebajikan dan kemasyarakatan yang dikemas kini terus dari Google Sheets</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 flex flex-col">
-          <div class="bg-emerald-700 h-40 flex items-center justify-center text-white text-4xl">
-            <i class="fa-solid fa-car-side"></i>
-          </div>
-          <div class="p-6 flex-1 flex flex-col justify-between">
-            <div>
-              <span class="text-xs font-semibold text-emerald-600 uppercase">Program Kemasyarakatan</span>
-              <h4 class="text-lg font-bold text-slate-900 mt-1 mb-2">Konvoi Perarakan Hari Kemerdekaan</h4>
-              <p class="text-sm text-slate-600">Perarakan konvoi berkereta bermula dari Tok Bali, Pasir Puteh, Kelantan menuju ke Penarik, Terengganu sempena sambutan merdeka.</p>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-400 font-medium">
-              31 Ogos • Bersama Ahli & Komuniti
-            </div>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 flex flex-col">
-          <div class="bg-amber-600 h-40 flex items-center justify-center text-white text-4xl">
-            <i class="fa-solid fa-hand-holding-heart"></i>
-          </div>
-          <div class="p-6 flex-1 flex flex-col justify-between">
-            <div>
-              <span class="text-xs font-semibold text-amber-600 uppercase">Misi Kebajikan</span>
-              <h4 class="text-lg font-bold text-slate-900 mt-1 mb-2">Ziarah Kasih OKU Pedalaman</h4>
-              <p class="text-sm text-slate-600">Menyantuni dan menghantar sumbangan terus ke pintu rumah golongan OKU daif di kawasan luar bandar dan pedalaman Kelantan.</p>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-400 font-medium">
-              Aktiviti Berkala • Biro Kebajikan
-            </div>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 flex flex-col">
-          <div class="bg-teal-700 h-40 flex items-center justify-center text-white text-4xl">
-            <i class="fa-solid fa-users-gear"></i>
-          </div>
-          <div class="p-6 flex-1 flex flex-col justify-between">
-            <div>
-              <span class="text-xs font-semibold text-teal-600 uppercase">Pentadbiran Pertubuhan</span>
-              <h4 class="text-lg font-bold text-slate-900 mt-1 mb-2">Mesyuarat Agung Tahunan INSANI</h4>
-              <p class="text-sm text-slate-600">Pertemuan rasmi perwakilan dan kepimpinan di Majlis Daerah Ketereh bagi merangka hala tuju persatuan dan membela kebajikan anggota.</p>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-400 font-medium">
-              Mesyuarat Agung Dwi-Tahunan / Tahunan
-            </div>
-          </div>
-        </div>
+
+      <!-- Loading State Indicator -->
+      <div id="aktivitiLoading" class="text-center py-10">
+        <i class="fa-solid fa-circle-notch fa-spin text-3xl text-emerald-600 mb-3"></i>
+        <p class="text-sm text-slate-500 font-medium">Memuatkan aktiviti terkini...</p>
+      </div>
+
+      <!-- Container Aktiviti Dinamik -->
+      <div id="aktivitiGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Akan diisi secara automatik oleh Google Sheets -->
       </div>
     </div>
   </section>
@@ -359,6 +323,107 @@
       navigator.clipboard.writeText(acc);
       alert('Nombor akaun berjaya disalin: ' + acc);
     }
+
+    // Default Fallback Activities jika Google Sheets belum ada data
+    const defaultAktiviti = [
+      {
+        tarikh: "31 Ogos • Bersama Ahli & Komuniti",
+        tajuk: "Konvoi Perarakan Hari Kemerdekaan",
+        kategori: "Kemasyarakatan",
+        penerangan: "Perarakan konvoi berkereta bermula dari Tok Bali, Pasir Puteh, Kelantan menuju ke Penarik, Terengganu sempena sambutan merdeka.",
+        gambar: ""
+      },
+      {
+        tarikh: "Aktiviti Berkala • Biro Kebajikan",
+        tajuk: "Ziarah Kasih OKU Pedalaman",
+        kategori: "Kebajikan",
+        penerangan: "Menyantuni dan menghantar sumbangan terus ke pintu rumah golongan OKU daif di kawasan luar bandar dan pedalaman Kelantan.",
+        gambar: ""
+      },
+      {
+        tarikh: "Mesyuarat Agung Tahunan",
+        tajuk: "Mesyuarat Agung Tahunan INSANI",
+        kategori: "Pentadbiran",
+        penerangan: "Pertemuan rasmi perwakilan dan kepimpinan di Majlis Daerah Ketereh bagi merangka hala tuju persatuan dan membela kebajikan anggota.",
+        gambar: ""
+      }
+    ];
+
+    function renderAktiviti(items) {
+      const grid = document.getElementById('aktivitiGrid');
+      const loader = document.getElementById('aktivitiLoading');
+      if (loader) loader.classList.add('hidden');
+      grid.innerHTML = '';
+
+      const list = (items && items.length > 0) ? items : defaultAktiviti;
+
+      list.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 flex flex-col hover:shadow-md transition duration-300";
+
+        let mediaHtml = '';
+        if (item.gambar && item.gambar.trim().startsWith('http')) {
+          mediaHtml = `
+            <div class="h-48 overflow-hidden bg-slate-100 relative">
+              <img src="${item.gambar}" alt="${item.tajuk || 'Aktiviti'}" class="w-full h-full object-cover hover:scale-105 transition duration-500" onerror="this.parentElement.innerHTML='<div class=\'bg-emerald-700 h-48 flex items-center justify-center text-white text-4xl\'><i class=\'fa-solid fa-camera\'></i></div>'">
+            </div>
+          `;
+        } else {
+          let icon = "fa-hand-holding-heart";
+          let bgCol = "bg-emerald-700";
+          if ((item.kategori || '').toLowerCase().includes('sukan') || (item.kategori || '').toLowerCase().includes('konvoi')) {
+            icon = "fa-car-side";
+            bgCol = "bg-teal-700";
+          } else if ((item.kategori || '').toLowerCase().includes('pentadbiran') || (item.kategori || '').toLowerCase().includes('mesyuarat')) {
+            icon = "fa-users-gear";
+            bgCol = "bg-slate-700";
+          } else if ((item.kategori || '').toLowerCase().includes('ramadhan') || (item.kategori || '').toLowerCase().includes('infaq')) {
+            icon = "fa-box-open";
+            bgCol = "bg-amber-600";
+          }
+          mediaHtml = `
+            <div class="${bgCol} h-48 flex items-center justify-center text-white text-4xl">
+              <i class="fa-solid ${icon}"></i>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          ${mediaHtml}
+          <div class="p-6 flex-1 flex flex-col justify-between">
+            <div>
+              <span class="inline-block text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded uppercase tracking-wide mb-2">${item.kategori || 'Aktiviti'}</span>
+              <h4 class="text-lg font-bold text-slate-900 mb-2 leading-snug">${item.tajuk || ''}</h4>
+              <p class="text-sm text-slate-600 leading-relaxed">${item.penerangan || ''}</p>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-400 font-medium flex items-center">
+              <i class="fa-regular fa-calendar-days mr-1.5 text-emerald-600"></i>
+              ${item.tarikh || 'Terkini'}
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    async function fetchAktivitiFromSheet() {
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=getAktiviti`);
+        if (!response.ok) throw new Error('Gagal memuat turun aktiviti');
+        const data = await response.json();
+        if (data && Array.isArray(data) && data.length > 0) {
+          renderAktiviti(data);
+        } else {
+          renderAktiviti(defaultAktiviti);
+        }
+      } catch (err) {
+        console.warn('Google Sheets aktiviti belum sedia atau ralat jaringan, memaparkan aktiviti lalai:', err);
+        renderAktiviti(defaultAktiviti);
+      }
+    }
+
+    // Panggil fungsi memuatkan aktiviti semasa laman web dibuka
+    document.addEventListener('DOMContentLoaded', fetchAktivitiFromSheet);
 
     async function handleFormSubmit(e) {
       e.preventDefault();
